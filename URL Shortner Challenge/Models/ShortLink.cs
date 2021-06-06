@@ -61,7 +61,7 @@ namespace URL_Shortner_Challenge.Models
             expired = created.AddDays(30);
         }
 
-        /*public void generateLink(List<string> links, string passedLink, HttpContext context, string user) // https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/
+        public void generateLink(List<string> links, string passedLink, HttpContext context, string user) // https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/
         {
             generateLink(links, passedLink, context);
 
@@ -81,7 +81,7 @@ namespace URL_Shortner_Challenge.Models
             this.created = DateTime.Now;
 
             expired = created.AddDays(30);
-        }*/
+        }
 
         //example: ZhIKcCb28K-
         private string randomString()

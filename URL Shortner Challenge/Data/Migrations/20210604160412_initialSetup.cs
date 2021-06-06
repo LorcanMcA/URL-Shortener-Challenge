@@ -15,8 +15,7 @@ namespace URL_Shortner_Challenge.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     entered = table.Column<string>(nullable: true),
                     returned = table.Column<string>(nullable: true),
-                    created = table.Column<DateTime>(nullable: false),
-                    expired = table.Column<DateTime>(nullable: false)
+                    created = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {

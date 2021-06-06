@@ -1,21 +1,79 @@
-﻿@{
+﻿@model URL_Shortner_Challenge.Models.ShortLink
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome to short links!</h1>
+    <h1 class="display-4">Welcome to Short Links!</h1>
     <h2>Enter a URL to be shortened</h2>
-    <form asp-action="createTempLink" asp-controller="ShortLinks">
 
-        <div class="form-group">
-            <label for="passedUrl" class="control-label"></label>
-            <input name="passedUrl" class="form-control" />
+    @if (User.Identity.IsAuthenticated)
+    {
+        <form asp-action="Create" asp-controller="ShortLinks">
+
+            <div class="form-group">
+                <label asp-for="entered" class="control-label"></label>
+                <input asp-for="entered" class="form-control" />
+                <span asp-validation-for="entered" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Search" class="btn btn-primary" />
+            </div>
+
+        </form>
+
+        /*
+            <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="entered" class="control-label"></label>
+                <input asp-for="entered" class="form-control" />
+                <span asp-validation-for="entered" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+        */
+    }
+    else
+    {
+        <form asp-action="createTempLink" asp-controller="ShortLinks">
+
+            <div class="form-group">
+                <label for="passedUrl" class="control-label"></label>
+                <input name="passedUrl" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Search" class="btn btn-primary" />
+            </div>
+
+        </form>
+    }
+
+    <hr />
+    <div class="row mb-2">
+        <div class="col-md-6">
+            <div card flex-md-row mb-4 box-shadow h-md-250">
+                <div class="card-body d-flex flex-column align-items-start">
+                    <p class="lead my-3">
+                        Short Links provides it users with quick and easy links to their favourite sites.
+                        The links last for 1 year before they expire.
+                        Registered users can create permanent links that they can view and manage.
+                    </p>
+                </div>
+            </div>
         </div>
+        <div class="col-md-6">
+            <div card flex-md-row mb-4 box-shadow h-md-250">
+                <div class="card-body d-flex flex-column align-items-start">
+                    <h1 class="display-4">Paste, click, GO!</h1>
+                </div>
 
-        <div class="form-group">
-            <input type="submit" value="Search" class="btn btn-primary" />
+            </div>
         </div>
-
-    </form>
-    <p><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Help">Help</a></p>
+    </div>
 </div>

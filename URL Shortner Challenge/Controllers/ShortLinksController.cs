@@ -45,28 +45,31 @@ namespace URL_Shortner_Challenge.Controllers
             return View("Index", await _context.ShortLink.Where(j => j.entered.Contains(SearchPhrase)).ToListAsync());
         }
 
-
-        // POST: ShortLinks/ShowSearchResults.
-        public async Task<IActionResult> createTempLink(string passedUrl)
+        private ShortLink CreateLink(bool permanent, string passedUrl)
         {
             List<ShortLink> links = _context.ShortLink.Where(j => j.expired < DateTime.Now).ToList();
             List<string> shortendedLinks = new List<string>();
+
             foreach (ShortLink lnk in links)
             {
                 shortendedLinks.Add(lnk.returned);
             }
 
-            ShortLink newLink = new ShortLink(shortendedLinks, passedUrl, HttpContext);
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ShortLink newLink;
 
-            //SignInManager<IdentityUser> man = new Microsoft.AspNetCore.Identity.SignInManager<IdentityUser>();
+            if (permanent)
+            {
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                newLink = new ShortLink(shortendedLinks, passedUrl, HttpContext, userId);
+            }
+            else
+            {
+                newLink = new ShortLink(shortendedLinks, passedUrl, HttpContext);
+            }
 
-
-            _context.Add(newLink);
-            await _context.SaveChangesAsync();
-
-            return View(newLink);
+            return newLink;
         }
+
 
         // Get: /l/{Link} 	https://localhost:44345/l/ZhIKcCb28K-
         public async Task<IActionResult> Open(string passedLink)
@@ -110,16 +113,26 @@ namespace URL_Shortner_Challenge.Controllers
             return View();
         }
 
+        // Called from the home index page when a user is not logged in.
+        public async Task<IActionResult> CreateTemp(string passedUrl)
+        {
+            ShortLink newLink = CreateLink(false, passedUrl);
+            _context.Add(newLink);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
         // POST: ShortLinks/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,entered,returned,created")] ShortLink shortLink)
+        public async Task<IActionResult> Create([Bind("entered")] ShortLink shortLink)
         {
             if (ModelState.IsValid)
             {
+                shortLink = CreateLink(true, shortLink.entered);
                 _context.Add(shortLink);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

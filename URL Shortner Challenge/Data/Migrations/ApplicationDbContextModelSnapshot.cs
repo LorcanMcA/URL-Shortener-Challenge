@@ -233,6 +233,7 @@ namespace URL_Shortner_Challenge.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("entered")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("expired")

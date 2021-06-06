@@ -10,7 +10,7 @@ using URL_Shortner_Challenge.Data;
 namespace URL_Shortner_Challenge.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210605113136_UpdatedShortLink")]
+    [Migration("20210606140534_UpdatedShortLink")]
     partial class UpdatedShortLink
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -235,6 +235,7 @@ namespace URL_Shortner_Challenge.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("entered")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("expired")

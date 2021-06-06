@@ -7,6 +7,14 @@ namespace URL_Shortner_Challenge.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<string>(
+                name: "entered",
+                table: "ShortLink",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
+
             migrationBuilder.AddColumn<string>(
                 name: "UserID",
                 table: "ShortLink",
@@ -28,6 +36,13 @@ namespace URL_Shortner_Challenge.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "expired",
                 table: "ShortLink");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "entered",
+                table: "ShortLink",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string));
         }
     }
 }
