@@ -26,6 +26,7 @@ namespace URL_Shortner_Challenge.Controllers
 
 
         // GET: ShortLinks
+        // Shows the links created by the currently loggend in user.
         public async Task<IActionResult> Index()
         {
             return View(await _context.ShortLink.ToListAsync());
@@ -40,55 +41,60 @@ namespace URL_Shortner_Challenge.Controllers
 
 
         // POST: ShortLinks/ShowSearchResults.
+        // Shows index filtered by search phrase and current user.
+        // Function only visible to logged in users.
         public async Task<IActionResult> ShowSearchResults(String SearchPhrase)
         {
-            return View("Index", await _context.ShortLink.Where(j => j.entered.Contains(SearchPhrase)).ToListAsync());
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            //shortLinks where the entered link matches the search AND the user IDs match.
+            return View("Index", await _context.ShortLink.Where(j => j.entered.Contains(SearchPhrase) && j.UserID == userId).ToListAsync());
         }
 
+
+        //Used to create short term and permanent links.
         private ShortLink CreateLink(bool permanent, string passedUrl)
         {
-            List<ShortLink> links = _context.ShortLink.Where(j => j.expired < DateTime.Now).ToList();
-            List<string> shortendedLinks = new List<string>();
-
-            foreach (ShortLink lnk in links)
-            {
-                shortendedLinks.Add(lnk.returned);
-            }
+            //Uses LINQ and lamda's to extract the shortened links from all the currently loaded links.
+            List<ShortLink> viableLinks = _context.ShortLink.Where(j => j.expired > DateTime.Now).ToList();
+            List<string> shortenedLinks = (from lnk in viableLinks select lnk.returned).ToList();
 
             ShortLink newLink;
 
-            if (permanent)
+            if (permanent) // Passes the user ID to a diffrent constructor that removes the expiration date.
             {
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                newLink = new ShortLink(shortendedLinks, passedUrl, HttpContext, userId);
+                newLink = new ShortLink(shortenedLinks, passedUrl, HttpContext, userId);
             }
-            else
+            else // With no user ID the links expiration date is set (currently 1 year)
             {
-                newLink = new ShortLink(shortendedLinks, passedUrl, HttpContext);
+                newLink = new ShortLink(shortenedLinks, passedUrl, HttpContext);
             }
 
             return newLink;
         }
 
 
-        // Get: /l/{Link} 	https://localhost:44345/l/ZhIKcCb28K-
+        // Get: /l/{Link} 	{host}/l/ZhIKcCb28K-
+        //OPen the link passed through the /l/{passedLink} endpoint in startup.
         public async Task<IActionResult> Open(string passedLink)
         {
             foreach (ShortLink link in _context.ShortLink)
             {
                 if(link != null)
                 {
+                    //Gets the last few characters from the saved short link.
+                    //This means the links should work even if the host changes.
                     if (passedLink == link.returned.Substring(link.returned.Length - 11)){
                         return Redirect(link.entered);
                     }
                 }
                 
             }
-            return View("Index");
-            //_context.ShortLink.Where(j => j.returned.Substring(j.returned.Length - 11) == shortlink).First().returned.ToString();
+            return View("Index"); //ToDo: return to error page.
         }
 
-            // GET: ShortLinks/Details/5
+        // GET: ShortLinks/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)

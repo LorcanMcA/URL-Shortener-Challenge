@@ -1,7 +1,10 @@
 ﻿/****************************************************************************************** 
- *	Object for storing the generated user links  *
+ *	Object for generating and storing user links  *
  *	
- *	The generate link method is used for initalising 
+ *	The two constructor are used to generate the new short link.
+ *	This could also be achieved by the data base with a stored procedure.
+ *	Moving this functionality to the data could assist with the speed of the website when handling large amounts of data.
+
  ******************************************************************************************/
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -20,19 +23,18 @@ namespace URL_Shortner_Challenge.Models
 
         [Required]
         [Display(Name = "Entered URL")]
-        public string entered { get; set; }
+        public string entered { get; set; } //The URL that is entered by the user.
 
         [Display(Name = "Generated URL")]
-        public string returned { get; set; }
+        public string returned { get; set; } //The generated URL that is returned to the user.
 
-        [Display(Name = "Date created")]
+        [Display(Name = "Date created")] // The date the URL is added to the database.
         [DataType(DataType.Date)]
         public DateTime created { get; set; }
 
         [Display(Name = "Expiration date")]
         [DataType(DataType.Date)]
-        public DateTime expired { get; set; }
-
+        public DateTime expired { get; set; } //The date the link is to be removed from the data base.
 
         public string UserID { get; set; }
 
@@ -41,50 +43,39 @@ namespace URL_Shortner_Challenge.Models
 
         }
 
+        // Constructor for permanant links. Calls the temporary link constructor then sets the expired date to the max possible. 
         public ShortLink(List<string> links, string passedLink, HttpContext context, string user) : this(links, passedLink, context)
         {
-            this.expired = created.AddYears(1);
+            this.expired = DateTime.MaxValue;
         }
 
-        public ShortLink(List<string> links, string passedLink, HttpContext context) // https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/
+        // Constructor for temporary links.
+        public ShortLink(List<string> links, string passedLink, HttpContext context)
         {
-            string host = $"{context.Request.Scheme}://{context.Request.Host}";
-            string newURL = host + "/l/" + randomString();
-            if (!links.Contains(newURL))
+            string host = $"{context.Request.Scheme}://{context.Request.Host}"; //Gets the current host (currently localhost:{port})
+
+            bool uniqueLink = false;
+            while (!uniqueLink)//Loops to ensure there are no duplicate links 
             {
-                this.returned = newURL;
+                string newURL = host + "/l/" + randomString(); // Formats the link to use the /l/{passedLink} endpoint
+
+                if (!links.Contains(newURL))
+                {
+                    this.returned = newURL;
+                    uniqueLink = true;
+                }
             }
 
-            this.entered = passedLink;
+
+            this.entered = passedLink; 
             this.created = DateTime.Now;
 
-            expired = created.AddDays(30);
+            expired = created.AddYears(1); //Sets the expiration date to 1 year
         }
 
-        public void generateLink(List<string> links, string passedLink, HttpContext context, string user) // https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/
-        {
-            generateLink(links, passedLink, context);
-
-            this.expired = created.AddYears(1);
-        }
-
-        public void generateLink(List<string> links, string passedLink, HttpContext context) // https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/
-        {
-            string host = $"{context.Request.Scheme}://{context.Request.Host}";
-            string newURL = host + "/l/" + randomString();
-            if (!links.Contains(newURL))
-            {
-                this.returned = newURL;
-            }
-
-            this.entered = passedLink;
-            this.created = DateTime.Now;
-
-            expired = created.AddDays(30);
-        }
-
+        //Generates a random string of characters.
         //example: ZhIKcCb28K-
-        private string randomString()
+        private string randomString()  // https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/
         {
             string newUrl = "";
             List<int> numbers = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
