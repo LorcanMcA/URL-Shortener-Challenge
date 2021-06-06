@@ -18,10 +18,12 @@ namespace URL_Shortner_Challenge.Controllers
     {
         private readonly ApplicationDbContext _context;
 
+
         public ShortLinksController(ApplicationDbContext context)
         {
             _context = context;
         }
+
 
         // GET: ShortLinks
         public async Task<IActionResult> Index()
@@ -29,11 +31,13 @@ namespace URL_Shortner_Challenge.Controllers
             return View(await _context.ShortLink.ToListAsync());
         }
 
+
         // GET: ShortLinks/ShowSearchForm.
         public async Task<IActionResult> ShowSearchForm()
         {
             return View();
         }
+
 
         // POST: ShortLinks/ShowSearchResults.
         public async Task<IActionResult> ShowSearchResults(String SearchPhrase)
@@ -41,11 +45,10 @@ namespace URL_Shortner_Challenge.Controllers
             return View("Index", await _context.ShortLink.Where(j => j.entered.Contains(SearchPhrase)).ToListAsync());
         }
 
+
         // POST: ShortLinks/ShowSearchResults.
         public async Task<IActionResult> createTempLink(string passedUrl)
         {
-            ShortLink newLink = new ShortLink();
-
             List<ShortLink> links = _context.ShortLink.Where(j => j.expired < DateTime.Now).ToList();
             List<string> shortendedLinks = new List<string>();
             foreach (ShortLink lnk in links)
@@ -53,7 +56,7 @@ namespace URL_Shortner_Challenge.Controllers
                 shortendedLinks.Add(lnk.returned);
             }
 
-            newLink.generateLink(shortendedLinks, passedUrl, HttpContext);
+            ShortLink newLink = new ShortLink(shortendedLinks, passedUrl, HttpContext);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //SignInManager<IdentityUser> man = new Microsoft.AspNetCore.Identity.SignInManager<IdentityUser>();

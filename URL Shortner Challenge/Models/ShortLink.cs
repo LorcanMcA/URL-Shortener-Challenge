@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿/****************************************************************************************** 
+ *	Object for storing the generated user links  *
+ *	
+ *	The generate link method is used for initalising 
+ ******************************************************************************************/
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -36,7 +41,27 @@ namespace URL_Shortner_Challenge.Models
 
         }
 
-        public void generateLink(List<string> links, string passedLink, HttpContext context, string user) // https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/
+        public ShortLink(List<string> links, string passedLink, HttpContext context, string user) : this(links, passedLink, context)
+        {
+            this.expired = created.AddYears(1);
+        }
+
+        public ShortLink(List<string> links, string passedLink, HttpContext context) // https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/
+        {
+            string host = $"{context.Request.Scheme}://{context.Request.Host}";
+            string newURL = host + "/l/" + randomString();
+            if (!links.Contains(newURL))
+            {
+                this.returned = newURL;
+            }
+
+            this.entered = passedLink;
+            this.created = DateTime.Now;
+
+            expired = created.AddDays(30);
+        }
+
+        /*public void generateLink(List<string> links, string passedLink, HttpContext context, string user) // https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/
         {
             generateLink(links, passedLink, context);
 
@@ -56,7 +81,7 @@ namespace URL_Shortner_Challenge.Models
             this.created = DateTime.Now;
 
             expired = created.AddDays(30);
-        }
+        }*/
 
         //example: ZhIKcCb28K-
         private string randomString()
