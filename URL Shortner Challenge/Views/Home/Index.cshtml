@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to short links!</h1>
+    <h2>Enter a URL to be shortened</h2>
+    <form asp-action="createTempLink" asp-controller="ShortLinks">
+
+        <div class="form-group">
+            <label for="passedUrl" class="control-label"></label>
+            <input name="passedUrl" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Search" class="btn btn-primary" />
+        </div>
+
+    </form>
+    <p><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Help">Help</a></p>
+</div>
