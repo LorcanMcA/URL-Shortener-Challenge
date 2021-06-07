@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<URL_Shortner_Challenge.Models.ShortLink>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Your Links";
 }
 
 <h1>Index</h1>
@@ -19,7 +19,7 @@
                 @Html.DisplayNameFor(model => model.returned)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.expired)
+                @Html.DisplayNameFor(model => model.created)
             </th>
             <th></th>
         </tr>
@@ -34,7 +34,7 @@
                 @Html.DisplayFor(modelItem => item.returned)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.expired)
+                @Html.DisplayFor(modelItem => item.created)
             </td>
             <td>
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |

@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace URL_Shortner_Challenge.Models
@@ -46,6 +47,7 @@ namespace URL_Shortner_Challenge.Models
         // Constructor for permanant links. Calls the temporary link constructor then sets the expired date to the max possible. 
         public ShortLink(List<string> links, string passedLink, HttpContext context, string user) : this(links, passedLink, context)
         {
+            this.UserID = user;
             this.expired = DateTime.MaxValue;
         }
 
@@ -103,6 +105,7 @@ namespace URL_Shortner_Challenge.Models
             }
             return newUrl;
         }
+
 
     }
 }

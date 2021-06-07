@@ -11,6 +11,8 @@ using URL_Shortner_Challenge.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using System.Net;
+using System.IO;
 
 namespace URL_Shortner_Challenge.Controllers
 {
@@ -27,13 +29,16 @@ namespace URL_Shortner_Challenge.Controllers
 
         // GET: ShortLinks
         // Shows the links created by the currently loggend in user.
+        [Authorize]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.ShortLink.ToListAsync());
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return View(await _context.ShortLink.Where(j => j.UserID == userId).ToListAsync());
         }
 
 
         // GET: ShortLinks/ShowSearchForm.
+        [Authorize]
         public async Task<IActionResult> ShowSearchForm()
         {
             return View();
@@ -43,12 +48,54 @@ namespace URL_Shortner_Challenge.Controllers
         // POST: ShortLinks/ShowSearchResults.
         // Shows index filtered by search phrase and current user.
         // Function only visible to logged in users.
+        [Authorize]
         public async Task<IActionResult> ShowSearchResults(String SearchPhrase)
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //shortLinks where the entered link matches the search AND the user IDs match.
             return View("Index", await _context.ShortLink.Where(j => j.entered.Contains(SearchPhrase) && j.UserID == userId).ToListAsync());
+        }
+
+        //validates that the link goes somewhere.
+        private bool ValidateLink(string url)
+        {
+            try
+            {
+                HttpWebResponse response;
+
+                //Creating the HttpWebRequest
+                HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                //Setting the Request method HEAD, you can also use GET too.
+                request.Method = "HEAD";
+                //Getting the Web Response.
+                using (response = request.GetResponse() as HttpWebResponse)
+                using (var responseStream = new StreamReader(response.GetResponseStream()))
+                {
+                    return response.StatusCode == HttpStatusCode.OK;
+                }
+            }
+            catch (Exception ex)
+            {
+                //Any exception will returns false.
+                return false;
+            }
+        }
+
+
+        // adds Http:// and www if not already in the string.
+        private string addPrefixes(string url)
+        {
+            if (!url.Contains("www"))
+            {
+                url = "www." + url;
+            }
+            if (!url.Contains("http"))
+            {
+                url = "http://" + url;
+            }
+
+            return url;
         }
 
 
@@ -91,7 +138,7 @@ namespace URL_Shortner_Challenge.Controllers
                 }
                 
             }
-            return View("Index"); //ToDo: return to error page.
+            return View("Expired"); //Expired link page.
         }
 
         // GET: ShortLinks/Details/5
@@ -122,10 +169,16 @@ namespace URL_Shortner_Challenge.Controllers
         // Called from the home index page when a user is not logged in.
         public async Task<IActionResult> CreateTemp(string passedUrl)
         {
+            passedUrl = addPrefixes(passedUrl);//Add http and www
+            if (!ValidateLink(passedUrl))//Checks the link goes somewhere.
+            {
+                return View("Expired");//Returns error page if it isn't a valid link.
+            }
+
             ShortLink newLink = CreateLink(false, passedUrl);
             _context.Add(newLink);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Details", new { id = newLink.Id });
         }
 
         // POST: ShortLinks/Create
@@ -138,6 +191,12 @@ namespace URL_Shortner_Challenge.Controllers
         {
             if (ModelState.IsValid)
             {
+                shortLink.entered = addPrefixes(shortLink.entered);//Add http and www
+                if (!ValidateLink(shortLink.entered))//Checks the link goes somewhere.
+                {
+                    return View("Expired");//Returns error page if it isn't a valid link.
+                }
+
                 shortLink = CreateLink(true, shortLink.entered);
                 _context.Add(shortLink);
                 await _context.SaveChangesAsync();
@@ -147,6 +206,7 @@ namespace URL_Shortner_Challenge.Controllers
         }
 
         // GET: ShortLinks/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -199,7 +259,6 @@ namespace URL_Shortner_Challenge.Controllers
         }
 
         // GET: ShortLinks/Delete/5
-        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
