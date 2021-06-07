@@ -28,11 +28,6 @@ namespace URL_Shortner_Challenge.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
         public IActionResult Help()
         {
             return View();
